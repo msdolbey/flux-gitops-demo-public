@@ -1,0 +1,45 @@
+apiVersion: source.toolkit.fluxcd.io/v1beta1
+kind: HelmRepository
+metadata:
+  name: bjw-s
+spec:
+  interval: 5m
+  url: https://bjw-s.github.io/helm-charts/
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: stress-ng
+spec:
+  interval: 5m
+  chart:
+    spec:
+      chart: app-template
+      version: "3.5.1"
+      sourceRef:
+        kind: HelmRepository
+        name: bjw-s
+      interval: 1m
+  values:
+    image:
+      repository: polinux/stress
+      tag: latest
+    controller:
+      type: deployment
+      replicas: 3
+    args:
+      - "--cpu"
+      - "4"
+      - "--vm"
+      - "2"
+      - "--vm-bytes"
+      - "512M"
+      - "--timeout"
+      - "300s"
+    resources:
+      requests:
+        cpu: "500m"
+        memory: "512Mi"
+      limits:
+        cpu: "2"
+        memory: "1Gi"
